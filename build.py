@@ -46,9 +46,6 @@ class BuildConfig:
         import PyInstaller.__main__
         for package in self.uvicorn_packages:
             self.pyinstallercommands.append(f"--hidden-import={package}")
-        # app_dir = self.workdir / "app"
-        # static_dir = self.workdir / "static"
-        # templates_dir = self.workdir / "templates"
         args = [
             str(self.app_path),
             "--distpath",
@@ -56,14 +53,9 @@ class BuildConfig:
             f"--name={self.executable}",
             "--onefile",
             "--windowed",
-            # f"--add-data={app_dir.parent.parent}\\app;app",
-            # f"--add-data={static_dir.parent.parent}\\static;static",
-            # f"--add-data={templates_dir.parent.parent}\\templates;templates",
         ]
 
         sys.path.insert(0, str(self.workdir))
-
-        # import the app to load the packages
         module_path = ".".join(
             list(reversed([x.stem for x in self.app_path.parents if x.stem]))
             + [self.app_path.stem]
@@ -72,8 +64,7 @@ class BuildConfig:
             importlib.import_module(module_path)
         except ImportError as e:
             print(f"No module found with this name: {e}")
-            return
-        # print(args + self.pyinstallercommands)
+            pass
         PyInstaller.__main__.run(args + self.pyinstallercommands)
 
 
