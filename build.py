@@ -4,7 +4,7 @@ import sys
 
 
 class BuildConfig:
-    def __init__(self, app_path, output_dir):
+    def __init__(self,executable_name: str, app_path: str, output_dir: str):
         self.app_path = pathlib.Path(app_path)
         self.app_name = self.app_path.stem
         self.workdir = pathlib.Path(output_dir).absolute()
@@ -29,11 +29,9 @@ class BuildConfig:
             "uvicorn.loops",
             "uvicorn.logging",
         ]
-        self.executable = "server"
+        self.executable = executable_name
 
-    def setup_uvicorn(self):
-        for package in self.uvicorn_packages:
-            self.pyinstallercommands.append(f"--hidden-import={package}")
+
 
     def add_hiddenimports(self, package):
         self.pyinstallercommands.append(f"--hidden-import={package}")
@@ -46,7 +44,8 @@ class BuildConfig:
 
     def run_build(self):
         import PyInstaller.__main__
-
+        for package in self.uvicorn_packages:
+            self.pyinstallercommands.append(f"--hidden-import={package}")
         # app_dir = self.workdir / "app"
         # static_dir = self.workdir / "static"
         # templates_dir = self.workdir / "templates"
@@ -78,9 +77,8 @@ class BuildConfig:
         PyInstaller.__main__.run(args + self.pyinstallercommands)
 
 
-config = BuildConfig("main.py", "build")
+config = BuildConfig("server", "main.py", "build")
 config.add_data("app")
 config.add_data("static")
 config.add_data("templates")
-config.setup_uvicorn()
 config.run_build()
