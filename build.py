@@ -3,8 +3,8 @@ import pathlib
 import sys
 
 
-class BuildConfig:
-    def __init__(self,executable_name: str, app_path: str, output_dir: str):
+class BuildEXE:
+    def __init__(self, executable_name: str, app_path: str, output_dir: str):
         self.app_path = pathlib.Path(app_path)
         self.app_name = self.app_path.stem
         self.workdir = pathlib.Path(output_dir).absolute()
@@ -28,10 +28,10 @@ class BuildConfig:
             "uvicorn.loops.uvloop",
             "uvicorn.loops",
             "uvicorn.logging",
+            "aap.server.log",
+            "app",
         ]
         self.executable = executable_name
-
-
 
     def add_hiddenimports(self, package):
         self.pyinstallercommands.append(f"--hidden-import={package}")
@@ -42,8 +42,13 @@ class BuildConfig:
             f"--add-data={app_dir.parent.parent}\\{folder_name};{folder_name}"
         )
 
+    def set_icon(self, icon_name):
+        icon_dir = self.workdir / str(icon_name)
+        self.pyinstallercommands.append(f"--icon={icon_dir.parent.parent}\\{icon_name}")
+
     def run_build(self):
         import PyInstaller.__main__
+
         for package in self.uvicorn_packages:
             self.pyinstallercommands.append(f"--hidden-import={package}")
         args = [
@@ -68,8 +73,11 @@ class BuildConfig:
         PyInstaller.__main__.run(args + self.pyinstallercommands)
 
 
-config = BuildConfig("server", "main.py", "build")
+
+
+config = BuildEXE("server", "main.py", "build")
 config.add_data("app")
 config.add_data("static")
 config.add_data("templates")
+config.set_icon("logo.ico")
 config.run_build()
